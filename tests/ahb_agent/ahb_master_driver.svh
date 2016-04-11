@@ -14,7 +14,9 @@ class ahb_master_drv extends uvm_driver #(ahb_trans);
 
     extern virtual function void build_phase(uvm_phase phase);
     extern virtual task main_phase(uvm_phase phase);
+	extern virtual task pre_reset_phase(uvm_phase phase);
     extern virtual task reset_phase(uvm_phase phase);
+	extern virtual task post_reset_phase(uvm_phase phase);
     extern         task drive_ahb_bus(ahb_trans req);
     extern         task wait_4_hready_resp( ref bit error);
 endclass : ahb_master_drv
@@ -26,24 +28,30 @@ function void ahb_master_drv::build_phase(uvm_phase phase);
         `uvm_fatal("ahb_master_drv", "Error in Getting interface");
 endfunction
 
+task ahb_master_drv::pre_reset_phase(uvm_phase phase);
+	//phase.raise_objection(this, "pre reset");
+endtask : pre_reset_phase
+
+task ahb_master_drv::post_reset_phase(uvm_phase phase);
+	//phase.drop_objection(this, "post reset");
+endtask : post_reset_phase
+
 task ahb_master_drv::reset_phase(uvm_phase phase);
     super.reset_phase(phase);
+	
+	phase.raise_objection(this, "pre reset");
+	
+	wait(ahb_master_if.MONPORT.ahb_slv_hreset_n)
+	`uvm_info(get_full_name(), "AHB Reset Rised", UVM_LOW)
+	
+	ahb_master_if.master_cb.ahb_slv_haddr     <= `AHB_ADDR_WIDTH  'b0;
+	ahb_master_if.master_cb.ahb_slv_hsize     <= `AHB_SIZE_WIDTH  'b0;
+	ahb_master_if.master_cb.ahb_slv_hburst    <= `AHB_BURST_WIDTH 'b0;
+	ahb_master_if.master_cb.ahb_slv_hwrite    <= 1                'b0;
+	ahb_master_if.master_cb.ahb_slv_htrans    <= `AHB_TYPE_WIDTH  'b0;
+	ahb_master_if.master_cb.ahb_slv_hwdata    <= `AHB_DATA_WIDTH  'b0;
 
-    //phase.raise_objection(this);
-    wait(ahb_master_if.MONPORT.ahb_slv_hreset_n)
-#100;
-    repeat(100) @(ahb_master_if.master_cb);
-    `uvm_info(get_full_name(), "AHB Reset Rised", UVM_LOW)
-
-    ahb_master_if.master_cb.ahb_slv_haddr     <= `AHB_ADDR_WIDTH  'b0;
-    ahb_master_if.master_cb.ahb_slv_hsize     <= `AHB_SIZE_WIDTH  'b0;
-    ahb_master_if.master_cb.ahb_slv_hburst    <= `AHB_BURST_WIDTH 'b0;
-    ahb_master_if.master_cb.ahb_slv_hwrite    <= 1                'b0;
-    ahb_master_if.master_cb.ahb_slv_htrans    <= `AHB_TYPE_WIDTH  'b0;
-    ahb_master_if.master_cb.ahb_slv_hwdata    <= `AHB_DATA_WIDTH  'b0;
-    @(ahb_master_if.master_cb);
-
-    //phase.drop_objection(this);
+	phase.drop_objection(this, "post reset");
 endtask : reset_phase
 
 task ahb_master_drv::drive_ahb_bus(ahb_trans req);
@@ -56,6 +64,8 @@ task ahb_master_drv::drive_ahb_bus(ahb_trans req);
     //`uvm_info(get_full_name(), "set delay", UVM_LOW)
     ahb_master_if.master_cb.ahb_slv_haddr     <= req.ahb_addr;
     ahb_master_if.master_cb.ahb_slv_hwrite    <= req.ahb_dirct;
+	
+	`uvm_info(get_full_name(), $psprintf("addr:%x", req.ahb_addr), UVM_LOW);
     //ahb_master_if.master_cb.ahb_slv_htrans    <= req.ahb_tran;
     //ahb_master_if.master_cb.ahb_slv_hsize     <= #1ps req.ahb_size;
     //ahb_master_if.master_cb.ahb_slv_hburst    <= #1ps req.ahb_burst;
@@ -66,11 +76,11 @@ task ahb_master_drv::drive_ahb_bus(ahb_trans req);
     ahb_master_if.master_cb.ahb_slv_htrans    <= 2;
 
     //data delay
-	repeat(req.ahb_delay) @(ahb_master_if.master_cb);
-    //while ( req.ahb_delay ) begin
-    //    @(ahb_master_if.master_cb);
-    //    req.ahb_delay--;
-    //end
+	//repeat(req.ahb_delay) @(ahb_master_if.master_cb);
+    while ( req.ahb_delay ) begin
+        @(ahb_master_if.master_cb);
+        req.ahb_delay--;
+    end
 
     @(ahb_master_if.master_cb);
     //wait(ahb_master_if.master_cb.slv_ahb_hready);

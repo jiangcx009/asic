@@ -5,7 +5,7 @@
 
 `include "ahb_type.svh"
 
-interface ahb_if_t (input logic clk);
+interface ahb_if_t (input logic clk, input hreset_n);
     logic                               	ahb_slv_hreset_n    ; // hreset input to the slave
     logic                              		ahb_slv_hbusreq     ; // hreset input to the slave
     
@@ -24,6 +24,9 @@ interface ahb_if_t (input logic clk);
     //logic                               	slv_ahb_hready      ; // hready output from the ahb_slave;
 	logic                               	slv_ahb_hready      ;     // hready to the AHB Bus 
     logic [ 1:0  ]                      	slv_ahb_hresp       ; // hresp from the AHB Slave ;
+	
+	bit 	has_coverage = 1;
+	bit		has_checks = 1;
 
 
     clocking cb @(posedge clk);
@@ -70,7 +73,7 @@ endclocking
         input        slv_ahb_hready,
         input        slv_ahb_hrdata,
         input        slv_ahb_hresp,
-        input        ahb_slv_hreset_n
+        input        hreset_n
     );
 
     modport SLVPORT (

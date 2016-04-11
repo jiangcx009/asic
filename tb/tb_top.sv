@@ -56,7 +56,7 @@ end
 `gen_clk(ahbClk,    AHB_CLK_PERIOD)
 
 
-ahb_if_t  ahb0     (ahbClk);
+ahb_if_t  ahb0     (ahbClk, ahbRstj);
 axi_if_t #(.AXI_RDATA_PORT_WIDTH(128),
            .AXI_WDATA_PORT_WIDTH(128)
           ) axi_pub  (axiclk);
