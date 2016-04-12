@@ -2,9 +2,11 @@
 `define AXI_MONITOR_SVH_
 
 class axi_monitor extends uvm_monitor;
+	axi_trans			axi_transfer[$];
+
     virtual axi_if_t    axi_slave_if;
-    uvm_analysis_port #(axi_trans) axi_slave_port;
-    uvm_blocking_get_port #(axi_trans) mon2scb_port;
+    uvm_analysis_port #(axi_trans) 		axi_slave_port;
+    uvm_blocking_get_port #(axi_trans) 	mon2scb_port;
 
     int                 dbg_flag;  // 1:i_monitor 0:o_monitor
 

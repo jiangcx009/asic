@@ -6,36 +6,36 @@
     while (axi_slave_if.cb.``S`` ===0 )  \
         @(axi_slave_if.cb)
 
-class axi_slave_drv extends uvm_driver #(axi_trans);
-
-	parameter   AXI_ADDR_WIDTH          =   32;
-    parameter   AXI_DATA_WIDTH          =   64;
-    parameter   AXI_RCMD_QUEUE_DEPTH    =   8;
-    parameter   AXI_WCMD_QUEUE_DEPTH    =   8;
-
-    parameter   AXI_ID_WIDTH            = 32;
-    parameter   AXI_BRST_WIDTH          = 2;
-  
-    parameter   AXI_SIZE_WIDTH      =   3;
-    parameter   AXI_LEN_WIDTH       =   4;
-    parameter   AXI_PROT_WIDTH      =   3;
-    parameter   AXI_CACH_WIDTH      =   4;
-    parameter   AXI_LOCK_WIDTH      =   2;
-    parameter   AXI_CMD_WIDTH           =   AXI_ADDR_WIDTH +
-											AXI_LEN_WIDTH +
-											AXI_SIZE_WIDTH + 
-											AXI_BRST_WIDTH +
-											AXI_LOCK_WIDTH +
-											AXI_CACH_WIDTH +
-											AXI_PROT_WIDTH +
-											AXI_ID_WIDTH ;
+class axi_slave_drv #(
+parameter   AXI_ADDR_WIDTH          = 32 ,
+parameter   AXI_DATA_WIDTH          = 128,
+parameter   AXI_RCMD_QUEUE_DEPTH    = 8  ,
+parameter   AXI_WCMD_QUEUE_DEPTH    = 8  ,
+                                         
+parameter   AXI_ID_WIDTH            = 32 ,
+parameter   AXI_BRST_WIDTH          = 2  ,
+                                         
+parameter   AXI_SIZE_WIDTH      	= 3	 ,
+parameter   AXI_LEN_WIDTH       	= 4	 ,
+parameter   AXI_PROT_WIDTH      	= 3	 ,
+parameter   AXI_CACH_WIDTH      	= 4	 ,
+parameter   AXI_LOCK_WIDTH      	= 2	 ,
+parameter   AXI_CMD_WIDTH           =   AXI_ADDR_WIDTH +
+										AXI_LEN_WIDTH  +
+										AXI_SIZE_WIDTH + 
+										AXI_BRST_WIDTH +
+										AXI_LOCK_WIDTH +
+										AXI_CACH_WIDTH +
+										AXI_PROT_WIDTH +
+										AXI_ID_WIDTH ,
 											
-    parameter   AXI_ADDR_LSB =  AXI_DATA_WIDTH  <=8     ? 0 :
-                                AXI_DATA_WIDTH  <=16    ? 1 :       
-                                AXI_DATA_WIDTH  <=32    ? 2 :       
-                                AXI_DATA_WIDTH  <=64    ? 3 :       
-                                AXI_DATA_WIDTH  <=128   ? 4 :       
-                                AXI_DATA_WIDTH  <=256   ? 5 : 6;
+parameter   AXI_ADDR_LSB 			=  AXI_DATA_WIDTH  <=8     ? 0 :
+									   AXI_DATA_WIDTH  <=16    ? 1 :       
+									   AXI_DATA_WIDTH  <=32    ? 2 :       
+									   AXI_DATA_WIDTH  <=64    ? 3 :       
+									   AXI_DATA_WIDTH  <=128   ? 4 :       
+									   AXI_DATA_WIDTH  <=256   ? 5 : 6
+) extends uvm_driver #(axi_trans);
 								
     axi_trans           axi_req;
     bit [AXI_CMD_WIDTH - 1 : 0 ] rd_cmd_queue  [ $ ] ; // take upto 8 command
@@ -84,6 +84,9 @@ endfunction
 
 task axi_slave_drv::reset_phase(uvm_phase phase);
     super.reset_phase(phase);
+	
+	phase.raise_objection(this, "pre reset");
+	`uvm_info(get_full_name(), "Axi Reset Rised", UVM_HIGH)
 
     axi_slave_if.SLVPORT.awready    <= 1'h0;
     axi_slave_if.SLVPORT.arready    <= 1'h0;
@@ -96,7 +99,8 @@ task axi_slave_drv::reset_phase(uvm_phase phase);
     axi_slave_if.SLVPORT.bid        <= 'h0;
     axi_slave_if.SLVPORT.bvalid     <= 1'h0;
     axi_slave_if.SLVPORT.bresp      <= 'h0;
-    @(axi_slave_if.cb);
+
+	phase.drop_objection(this, "post reset");
 endtask : reset_phase
 
 task axi_slave_drv::main_phase(uvm_phase phase);

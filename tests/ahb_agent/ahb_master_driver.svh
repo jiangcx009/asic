@@ -42,7 +42,7 @@ task ahb_master_drv::reset_phase(uvm_phase phase);
 	phase.raise_objection(this, "pre reset");
 	
 	wait(ahb_master_if.MONPORT.ahb_slv_hreset_n)
-	`uvm_info(get_full_name(), "AHB Reset Rised", UVM_LOW)
+	`uvm_info(get_full_name(), "AHB Reset Rised", UVM_HIGH)
 	
 	ahb_master_if.master_cb.ahb_slv_haddr     <= `AHB_ADDR_WIDTH  'b0;
 	ahb_master_if.master_cb.ahb_slv_hsize     <= `AHB_SIZE_WIDTH  'b0;
@@ -65,7 +65,7 @@ task ahb_master_drv::drive_ahb_bus(ahb_trans req);
     ahb_master_if.master_cb.ahb_slv_haddr     <= req.ahb_addr;
     ahb_master_if.master_cb.ahb_slv_hwrite    <= req.ahb_dirct;
 	
-	`uvm_info(get_full_name(), $psprintf("addr:%x", req.ahb_addr), UVM_LOW);
+	`uvm_info(get_full_name(), $psprintf("addr:%x", req.ahb_addr), UVM_HIGH);
     //ahb_master_if.master_cb.ahb_slv_htrans    <= req.ahb_tran;
     //ahb_master_if.master_cb.ahb_slv_hsize     <= #1ps req.ahb_size;
     //ahb_master_if.master_cb.ahb_slv_hburst    <= #1ps req.ahb_burst;

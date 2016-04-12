@@ -23,7 +23,7 @@ function void axi_agent::build_phase(uvm_phase phase);
 
     if ( is_active == UVM_ACTIVE ) begin
         axi_sqr = axi_sequencer::type_id::create("axi_sqr", this);
-        axi_slv_drv = axi_slave_drv::type_id::create("axi_slv_drv", this);
+        axi_slv_drv = axi_slave_drv#()::type_id::create("axi_slv_drv", this);
     end
 
     axi_mon = axi_monitor::type_id::create("axi_mon", this);

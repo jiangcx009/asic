@@ -98,6 +98,9 @@ parameter AXI_BSIDEBAND_PORT_WIDTH       = 64
     logic [AXI_AID_PORT_WIDTH - 1: 0]           bid;
     logic                                       bready;
     logic [AXI_BSIDEBAND_PORT_WIDTH - 1: 0]     bsideband;
+	
+	bit		has_checks = 1;
+	bit		has_coverage = 1;
 
     clocking cb @(posedge clk);
         input   clk;
