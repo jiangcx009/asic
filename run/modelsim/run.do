@@ -30,5 +30,7 @@ vlog +incdir+$UVMPATH  +incdir+$INCPATH/tb \
 	 +acc -incr -sv -svext -f $INCPATH/run/modelsim/encjpg.f 
 				
 vsim -novopt work.tb_top +UVM_VERBOSITY=UVM_HIGH +UVM_TESTNAME=encjpg
+add wave -position insertpoint sim:/tb_top/wdut0/dut/*
+run -all
 				
 
